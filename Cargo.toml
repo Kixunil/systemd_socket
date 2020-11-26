@@ -1,0 +1,21 @@
+[package]
+name = "systemd_socket"
+version = "0.1.0"
+authors = ["Martin Habovstiak <martin.habovstiak@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+serde = ["serde_crate", "serde_str_helpers"]
+
+[dependencies]
+thiserror = "1.0.22"
+serde_crate = { package = "serde", version = "1.0.117", optional = true, features = ["derive"] }
+serde_str_helpers = { version = "0.1.0", optional = true }
+parse_arg = { version = "0.1.4", optional = true }
+libsystemd = "0.2.1"
+lazy_static = "1.4.0"
+tokio_0_2 = { package = "tokio", version = "0.2", optional = true, features = ["tcp"] }
+tokio_0_3 = { package = "tokio", version = "0.3", optional = true, features = ["net"] }
+async-std = { version = "1.7.0", optional = true }
