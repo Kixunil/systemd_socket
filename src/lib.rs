@@ -11,6 +11,9 @@
 //! Thanks to this the change to your code should be minimal - parsing will continue to work, it'll just allow a new format.
 //! You only need to change the code to use `SocketAddr::bind()` instead of `TcpListener::bind()` for binding.
 //!
+//! You also don't need to worry about conditional compilation to ensure OS compatibility.
+//! This crate handles that for you by disabling systemd on non-linux systems.
+//!
 //! Further, the crate also provides methods for binding `tokio` 0.2, 0.3, and `async_std` sockets if the appropriate features are
 //! activated.
 //! 
@@ -62,6 +65,10 @@ use std::ffi::{OsStr, OsString};
 use crate::error::*;
 use crate::resolv_addr::ResolvAddr;
 
+#[cfg(not(linux))]
+use std::convert::Infallible as Never;
+
+#[cfg(linux)]
 pub(crate) mod systemd_sockets {
     use std::fmt;
     use std::sync::Mutex;
@@ -217,11 +224,18 @@ impl SocketAddr {
     // rules.
     fn try_from_generic<'a, T>(string: T) -> Result<Self, ParseError> where T: 'a + std::ops::Deref<Target=str> + Into<String> {
         if string.starts_with(SYSTEMD_PREFIX) {
-            let name_len = string.len() - SYSTEMD_PREFIX.len();
-            match string[SYSTEMD_PREFIX.len()..].chars().enumerate().find(|(_, c)| !c.is_ascii() || *c < ' ' || *c == ':') {
-                None if name_len <= 255 => Ok(SocketAddr(SocketAddrInner::Systemd(string.into()))),
-                None => Err(ParseErrorInner::LongSocketName { string: string.into(), len: name_len }.into()),
-                Some((pos, c)) => Err(ParseErrorInner::InvalidCharacter { string: string.into(), c, pos, }.into()),
+            #[cfg(linux)]
+            {
+                let name_len = string.len() - SYSTEMD_PREFIX.len();
+                match string[SYSTEMD_PREFIX.len()..].chars().enumerate().find(|(_, c)| !c.is_ascii() || *c < ' ' || *c == ':') {
+                    None if name_len <= 255 => Ok(SocketAddr(SocketAddrInner::Systemd(string.into()))),
+                    None => Err(ParseErrorInner::LongSocketName { string: string.into(), len: name_len }.into()),
+                    Some((pos, c)) => Err(ParseErrorInner::InvalidCharacter { string: string.into(), c, pos, }.into()),
+                }
+            }
+            #[cfg(not(linux))]
+            {
+                Err(ParseErrorInner::SystemdUnsupported(string.into()).into())
             }
         } else {
             match string.parse() {
@@ -231,6 +245,7 @@ impl SocketAddr {
         }
     }
 
+    #[cfg(linux)]
     fn get_systemd(socket_name: String) -> Result<(std::net::TcpListener, SocketAddrInner), BindError> {
         use libsystemd::activation::IsType;
         use std::os::unix::io::{FromRawFd, IntoRawFd};
@@ -247,6 +262,13 @@ impl SocketAddr {
                 None => Err(BindErrorInner::MissingDescriptor(socket_name).into())
             }
         }
+    }
+
+    // This approach makes the rest of the code much simpler as it doesn't require sprinkling it
+    // with #[cfg(linux)] yet still statically guarantees it won't execute.
+    #[cfg(not(linux))]
+    fn get_systemd(socket_name: Never) -> Result<(std::net::TcpListener, SocketAddrInner), BindError> {
+        match socket_name {}
     }
 }
 
@@ -275,7 +297,11 @@ impl fmt::Display for SocketAddrInner {
 enum SocketAddrInner {
     Ordinary(std::net::SocketAddr),
     WithHostname(resolv_addr::ResolvAddr),
+    #[cfg(linux)]
     Systemd(String),
+    #[cfg(not(linux))]
+    #[allow(dead_code)]
+    Systemd(Never),
 }
 
 const SYSTEMD_PREFIX: &str = "systemd://";

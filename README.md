@@ -13,6 +13,9 @@ The provided type supports conversions from various types of strings and also `s
 Thanks to this the change to your code should be minimal - parsing will continue to work, it'll just allow a new format.
 You only need to change the code to use `SocketAddr::bind()` instead of `TcpListener::bind()` for binding.
 
+You also don't need to worry about conditional compilation to ensure OS compatibility.
+This crate handles that for you by disabling systemd on non-linux systems.
+
 Further, the crate also provides methods for binding `tokio` 0.2, 0.3, and `async_std` sockets if the appropriate features are
 activated.
 

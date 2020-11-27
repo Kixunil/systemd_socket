@@ -19,10 +19,15 @@ pub struct ParseError(#[from] pub(crate) ParseErrorInner);
 pub(crate) enum ParseErrorInner {
     #[error("failed to parse socket address")]
     ResolvAddr(#[from] crate::resolv_addr::ResolvAddrError),
+    #[cfg(linux)]
     #[error("invalid character '{c}' in systemd socket name {string} at position {pos}")]
     InvalidCharacter { string: String, c: char, pos: usize, },
+    #[cfg(linux)]
     #[error("systemd socket name {string} is {len} characters long which is more than the limit 255")]
     LongSocketName { string: String, len: usize, },
+    #[cfg(not(linux))]
+    #[error("can't parse {0} because systemd is not supported on this operating system")]
+    SystemdUnsupported(String),
 }
 
 /// Error that can occur during parsing of `SocketAddr` from a `OsStr`/`OsString`
@@ -60,11 +65,14 @@ pub(crate) enum BindErrorInner {
     BindFailed { addr: std::net::SocketAddr, #[source] error: io::Error, },
     #[error("failed to bind {addr}")]
     BindOrResolvFailed { addr: crate::resolv_addr::ResolvAddr, #[source] error: io::Error, },
+    #[cfg(linux)]
     #[error("failed to receive descriptors with names")]
     ReceiveDescriptors(#[source] crate::systemd_sockets::Error),
     #[error("missing systemd socket {0} - a typo or an attempt to bind twice")]
+    #[cfg(linux)]
     MissingDescriptor(String),
     #[error("the systemd socket {0} is not an internet socket")]
+    #[cfg(linux)]
     NotInetSocket(String),
 }
 
