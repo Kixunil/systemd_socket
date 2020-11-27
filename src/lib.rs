@@ -163,8 +163,10 @@ impl SocketAddr {
     // rules.
     fn try_from_generic<'a, T>(string: T) -> Result<Self, ParseError> where T: 'a + std::ops::Deref<Target=str> + Into<String> {
         if string.starts_with(SYSTEMD_PREFIX) {
+            let name_len = string.len() - SYSTEMD_PREFIX.len();
             match string[SYSTEMD_PREFIX.len()..].chars().enumerate().find(|(_, c)| !c.is_ascii() || *c < ' ' || *c == ':') {
-                None => Ok(SocketAddr(SocketAddrInner::Systemd(string.into()))),
+                None if name_len <= 255 => Ok(SocketAddr(SocketAddrInner::Systemd(string.into()))),
+                None => Err(ParseErrorInner::LongSocketName { string: string.into(), len: name_len }.into()),
                 Some((pos, c)) => Err(ParseErrorInner::InvalidCharacter { string: string.into(), c, pos, }.into()),
             }
         } else {
@@ -306,5 +308,29 @@ mod tests {
     #[test]
     fn parse_systemd() {
         assert_eq!("systemd://foo".parse::<SocketAddr>().unwrap().0, SocketAddrInner::Systemd("systemd://foo".to_owned()));
+    }
+
+    #[test]
+    #[should_panic]
+    fn parse_systemd_fail_control() {
+        "systemd://foo\n".parse::<SocketAddr>().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn parse_systemd_fail_colon() {
+        "systemd://foo:".parse::<SocketAddr>().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn parse_systemd_fail_non_ascii() {
+        "systemd://fooá".parse::<SocketAddr>().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn parse_systemd_fail_too_long() {
+        "systemd://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".parse::<SocketAddr>().unwrap();
     }
 }

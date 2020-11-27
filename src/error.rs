@@ -20,7 +20,9 @@ pub(crate) enum ParseErrorInner {
     #[error("failed to parse socket address")]
     SocketAddr(std::net::AddrParseError),
     #[error("invalid character '{c}' in systemd socket name {string} at position {pos}")]
-    InvalidCharacter { string: String, c: char, pos: usize, }
+    InvalidCharacter { string: String, c: char, pos: usize, },
+    #[error("systemd socket name {string} is {len} characters long which is more than the limit 255")]
+    LongSocketName { string: String, len: usize, },
 }
 
 /// Error that can occur during parsing of `SocketAddr` from a `OsStr`/`OsString`
