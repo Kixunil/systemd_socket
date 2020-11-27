@@ -15,7 +15,7 @@ fn main_master(slave: io::Result<Child>) {
     let mut slave = slave.expect("failed to run systemd-socket-activate");
 
     // give slave some time to bind the socket just to be sure
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    std::thread::sleep(std::time::Duration::from_secs(5));
 
     let mut client_socket = std::net::TcpStream::connect("127.0.0.1:4242").expect("Failed to connect to 127.0.0.1:4242");
     client_socket.write_all(REQUEST).expect("failed to send data");
