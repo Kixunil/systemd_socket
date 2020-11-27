@@ -7,7 +7,7 @@ mod comm;
 enum Test {}
 
 impl comm::Test for Test {
-    const SOCKET_ADDR: &'static str = "127.0.0.1:4242";
+    const SOCKET_ADDR: &'static str = "localhost:4242";
 
     fn spawn_slave(program_name: &OsStr) -> io::Result<Child> {
         Command::new(program_name)

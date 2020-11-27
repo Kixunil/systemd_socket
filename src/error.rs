@@ -18,7 +18,7 @@ pub struct ParseError(#[from] pub(crate) ParseErrorInner);
 #[derive(Debug, Error)]
 pub(crate) enum ParseErrorInner {
     #[error("failed to parse socket address")]
-    SocketAddr(std::net::AddrParseError),
+    ResolvAddr(#[from] crate::resolv_addr::ResolvAddrError),
     #[error("invalid character '{c}' in systemd socket name {string} at position {pos}")]
     InvalidCharacter { string: String, c: char, pos: usize, },
     #[error("systemd socket name {string} is {len} characters long which is more than the limit 255")]
@@ -58,6 +58,8 @@ pub struct BindError(#[from] pub(crate) BindErrorInner);
 pub(crate) enum BindErrorInner {
     #[error("failed to bind {addr}")]
     BindFailed { addr: std::net::SocketAddr, #[source] error: io::Error, },
+    #[error("failed to bind {addr}")]
+    BindOrResolvFailed { addr: crate::resolv_addr::ResolvAddr, #[source] error: io::Error, },
     #[error("failed to receive descriptors with names")]
     ReceiveDescriptors(#[source] crate::systemd_sockets::Error),
     #[error("missing systemd socket {0} - a typo or an attempt to bind twice")]

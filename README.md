@@ -13,7 +13,8 @@ The provided type supports conversions from various types of strings and also `s
 Thanks to this the change to your code should be minimal - parsing will continue to work, it'll just allow a new format.
 You only need to change the code to use `SocketAddr::bind()` instead of `TcpListener::bind()` for binding.
 
-Further, the crate also provides convenience methods for binding `tokio` 0.2, 0.3, and `async_std` sockets.
+Further, the crate also provides methods for binding `tokio` 0.2, 0.3, and `async_std` sockets if the appropriate features are
+activated.
 
 ## Example
 
@@ -42,9 +43,9 @@ loop {
 
 * `serde` - implements `serde::Deserialize` for `SocketAddr`
 * `parse_arg` - implements `parse_arg::ParseArg` for `SocketAddr`
-* `tokio_0_2` - adds `bind_tokio_0_2` convenience method to `SocketAddr`
-* `tokio_0_3` - adds `bind_tokio_0_3` convenience method to `SocketAddr`
-* `async_std` - adds `bind_async_std` convenience method to `SocketAddr`
+* `tokio_0_2` - adds `bind_tokio_0_2` method to `SocketAddr`
+* `tokio_0_3` - adds `bind_tokio_0_3` method to `SocketAddr`
+* `async_std` - adds `bind_async_std` method to `SocketAddr`
 
 ## MSRV
 
