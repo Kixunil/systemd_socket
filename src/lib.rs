@@ -383,8 +383,16 @@ mod tests {
     }
 
     #[test]
+    #[cfg(linux)]
     fn parse_systemd() {
         assert_eq!("systemd://foo".parse::<SocketAddr>().unwrap().0, SocketAddrInner::Systemd("systemd://foo".to_owned()));
+    }
+
+    #[test]
+    #[cfg(not(linux))]
+    #[should_panic]
+    fn parse_systemd() {
+        "systemd://foo".parse::<SocketAddr>().unwrap();
     }
 
     #[test]

@@ -23,6 +23,7 @@ impl comm::Test for Test {
 }
 
 #[test]
+#[cfg_attr(not(linux), should_panic)]
 fn main() {
     comm::main::<Test>();
 }
