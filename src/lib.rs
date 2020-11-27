@@ -44,6 +44,12 @@
 //! * `tokio_0_2` - adds `bind_tokio_0_2` convenience method to `SocketAddr`
 //! * `tokio_0_3` - adds `bind_tokio_0_3` convenience method to `SocketAddr`
 //! * `async_std` - adds `bind_async_std` convenience method to `SocketAddr`
+//!
+//! ## MSRV
+//!
+//! This crate must always compile with the latest Rust available in the latest Debian stable.
+//! That is currently Rust 1.41.1. (Debian 10 - Buster)
+
 
 #![deny(missing_docs)]
 
