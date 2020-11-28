@@ -351,7 +351,7 @@ impl<'a> TryFrom<serde_str_helpers::DeserBorrowStr<'a>> for SocketAddr {
     type Error = ParseError;
 
     fn try_from(s: serde_str_helpers::DeserBorrowStr<'a>) -> Result<Self, Self::Error> {
-        SocketAddr::try_from_generic(std::borrow::Cow::from(s))
+        SocketAddr::try_from_generic(s)
     }
 }
 
