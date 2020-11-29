@@ -306,6 +306,24 @@ enum SocketAddrInner {
 
 const SYSTEMD_PREFIX: &str = "systemd://";
 
+impl<I: Into<std::net::IpAddr>> From<(I, u16)> for SocketAddr {
+    fn from(value: (I, u16)) -> Self {
+        SocketAddr(SocketAddrInner::Ordinary(value.into()))
+    }
+}
+
+impl From<std::net::SocketAddrV4> for SocketAddr {
+    fn from(value: std::net::SocketAddrV4) -> Self {
+        SocketAddr(SocketAddrInner::Ordinary(value.into()))
+    }
+}
+
+impl From<std::net::SocketAddrV6> for SocketAddr {
+    fn from(value: std::net::SocketAddrV6) -> Self {
+        SocketAddr(SocketAddrInner::Ordinary(value.into()))
+    }
+}
+
 impl std::str::FromStr for SocketAddr {
     type Err = ParseError;
 
