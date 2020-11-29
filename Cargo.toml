@@ -14,7 +14,7 @@ libsystemd = "0.2.1"
 
 [dependencies]
 thiserror = "1.0.22"
-serde_crate = { package = "serde", version = "1.0.117", optional = true, features = ["derive"] }
+serde_crate = { package = "serde", version = "1.0.116", optional = true, features = ["derive"] }
 serde_str_helpers = { version = "0.1.2", optional = true }
 parse_arg = { version = "0.1.4", optional = true }
 lazy_static = "1.4.0"
