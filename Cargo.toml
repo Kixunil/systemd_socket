@@ -13,7 +13,7 @@ serde = ["serde_crate", "serde_str_helpers"]
 libsystemd = "0.2.1"
 
 [dependencies]
-thiserror = "1.0.22"
+thiserror = "1.0.21"
 serde_crate = { package = "serde", version = "1.0.116", optional = true, features = ["derive"] }
 serde_str_helpers = { version = "0.1.2", optional = true }
 parse_arg = { version = "0.1.4", optional = true }
