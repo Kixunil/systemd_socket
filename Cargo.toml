@@ -7,9 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
+default = ["enable_systemd"]
 serde = ["serde_crate", "serde_str_helpers"]
+enable_systemd = []
 
-[target.'cfg(target_os = "linux")'.dependencies]
+[target.'cfg(all(target_os = "linux", feature = "enable_systemd"))'.dependencies]
 libsystemd = "0.2.1"
 
 [dependencies]

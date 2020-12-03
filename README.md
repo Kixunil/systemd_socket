@@ -44,6 +44,9 @@ loop {
 
 ## Features
 
+* `enable_systemd` - on by default, the existence of this feature can allow your users to turn
+  off systemd support if they don't need it. Note that it's already disabled on non-linux
+  systems, so you don't need to care about that.
 * `serde` - implements `serde::Deserialize` for `SocketAddr`
 * `parse_arg` - implements `parse_arg::ParseArg` for `SocketAddr`
 * `tokio_0_2` - adds `bind_tokio_0_2` method to `SocketAddr`

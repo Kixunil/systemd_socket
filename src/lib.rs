@@ -42,6 +42,9 @@
 //!
 //! ## Features
 //!
+//! * `enable_systemd` - on by default, the existence of this feature can allow your users to turn
+//!   off systemd support if they don't need it. Note that it's already disabled on non-linux
+//!   systems, so you don't need to care about that.
 //! * `serde` - implements `serde::Deserialize` for `SocketAddr`
 //! * `parse_arg` - implements `parse_arg::ParseArg` for `SocketAddr`
 //! * `tokio_0_2` - adds `bind_tokio_0_2` method to `SocketAddr`
@@ -65,10 +68,10 @@ use std::ffi::{OsStr, OsString};
 use crate::error::*;
 use crate::resolv_addr::ResolvAddr;
 
-#[cfg(not(linux))]
+#[cfg(not(all(linux, feature = "enable_systemd")))]
 use std::convert::Infallible as Never;
 
-#[cfg(linux)]
+#[cfg(all(linux, feature = "enable_systemd"))]
 pub(crate) mod systemd_sockets {
     use std::fmt;
     use std::sync::Mutex;
@@ -224,7 +227,7 @@ impl SocketAddr {
     // rules.
     fn try_from_generic<'a, T>(string: T) -> Result<Self, ParseError> where T: 'a + std::ops::Deref<Target=str> + Into<String> {
         if string.starts_with(SYSTEMD_PREFIX) {
-            #[cfg(linux)]
+            #[cfg(all(linux, feature = "enable_systemd"))]
             {
                 let name_len = string.len() - SYSTEMD_PREFIX.len();
                 match string[SYSTEMD_PREFIX.len()..].chars().enumerate().find(|(_, c)| !c.is_ascii() || *c < ' ' || *c == ':') {
@@ -233,7 +236,7 @@ impl SocketAddr {
                     Some((pos, c)) => Err(ParseErrorInner::InvalidCharacter { string: string.into(), c, pos, }.into()),
                 }
             }
-            #[cfg(not(linux))]
+            #[cfg(not(all(linux, feature = "enable_systemd")))]
             {
                 Err(ParseErrorInner::SystemdUnsupported(string.into()).into())
             }
@@ -245,7 +248,7 @@ impl SocketAddr {
         }
     }
 
-    #[cfg(linux)]
+    #[cfg(all(linux, feature = "enable_systemd"))]
     fn get_systemd(socket_name: String) -> Result<(std::net::TcpListener, SocketAddrInner), BindError> {
         use libsystemd::activation::IsType;
         use std::os::unix::io::{FromRawFd, IntoRawFd};
@@ -265,7 +268,7 @@ impl SocketAddr {
     }
 
     // This approach makes the rest of the code much simpler as it doesn't require sprinkling it
-    // with #[cfg(linux)] yet still statically guarantees it won't execute.
+    // with #[cfg(all(linux, feature = "enable_systemd"))] yet still statically guarantees it won't execute.
     #[cfg(not(linux))]
     fn get_systemd(socket_name: Never) -> Result<(std::net::TcpListener, SocketAddrInner), BindError> {
         match socket_name {}
@@ -297,9 +300,9 @@ impl fmt::Display for SocketAddrInner {
 enum SocketAddrInner {
     Ordinary(std::net::SocketAddr),
     WithHostname(resolv_addr::ResolvAddr),
-    #[cfg(linux)]
+    #[cfg(all(linux, feature = "enable_systemd"))]
     Systemd(String),
-    #[cfg(not(linux))]
+    #[cfg(not(all(linux, feature = "enable_systemd")))]
     #[allow(dead_code)]
     Systemd(Never),
 }
@@ -401,13 +404,13 @@ mod tests {
     }
 
     #[test]
-    #[cfg(linux)]
+    #[cfg(all(linux, feature = "enable_systemd"))]
     fn parse_systemd() {
         assert_eq!("systemd://foo".parse::<SocketAddr>().unwrap().0, SocketAddrInner::Systemd("systemd://foo".to_owned()));
     }
 
     #[test]
-    #[cfg(not(linux))]
+    #[cfg(not(all(linux, feature = "enable_systemd")))]
     #[should_panic]
     fn parse_systemd() {
         "systemd://foo".parse::<SocketAddr>().unwrap();
