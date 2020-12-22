@@ -12,12 +12,16 @@ const REQUEST: &[u8] = b"orange coin";
 const RESPONSE: &[u8] = b"good";
 
 fn main_master(slave: io::Result<Child>) {
-    let mut slave = slave.expect("failed to run systemd-socket-activate");
+    let mut slave = slave.expect("failed to run a child");
 
     // give slave some time to bind the socket just to be sure
     std::thread::sleep(std::time::Duration::from_secs(5));
 
-    let mut client_socket = std::net::TcpStream::connect("127.0.0.1:4242").expect("Failed to connect to 127.0.0.1:4242");
+    if let Some(exited) = slave.try_wait().expect("failed to check if the child exited") {
+        panic!("child exited unexpectedly: {}", exited);
+    }
+
+    let mut client_socket = std::net::TcpStream::connect("localhost:4242").expect("Failed to connect to 127.0.0.1:4242");
     client_socket.write_all(REQUEST).expect("failed to send data");
     let mut buf = [0u8; RESPONSE.len()];
     client_socket.read_exact(&mut buf).expect("failed to read response");
