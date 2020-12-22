@@ -359,6 +359,12 @@ impl<I: Into<std::net::IpAddr>> From<(I, u16)> for SocketAddr {
     }
 }
 
+impl From<std::net::SocketAddr> for SocketAddr {
+    fn from(value: std::net::SocketAddr) -> Self {
+        SocketAddr(SocketAddrInner::Ordinary(value))
+    }
+}
+
 impl From<std::net::SocketAddrV4> for SocketAddr {
     fn from(value: std::net::SocketAddrV4) -> Self {
         SocketAddr(SocketAddrInner::Ordinary(value.into()))
