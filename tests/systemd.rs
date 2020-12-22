@@ -23,7 +23,7 @@ impl comm::Test for Test {
 }
 
 #[test]
-#[cfg_attr(not(all(linux, feature = "enable_systemd")), should_panic)]
+#[cfg_attr(not(all(target_os = "linux", feature = "enable_systemd")), should_panic)]
 fn main() {
     comm::main::<Test>();
 }

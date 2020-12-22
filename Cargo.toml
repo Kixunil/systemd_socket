@@ -17,10 +17,12 @@ license = "MITNFA"
 [features]
 default = ["enable_systemd"]
 serde = ["serde_crate", "serde_str_helpers"]
-enable_systemd = []
+enable_systemd = ["libsystemd"]
 
-[target.'cfg(all(target_os = "linux", feature = "enable_systemd"))'.dependencies]
-libsystemd = "0.2.1"
+[target.'cfg(target_os = "linux")'.dependencies]
+# WARNING: It is NOT guaranteed that this crate will always use libsystemd as dependency!
+#          This as a feature is not considered a public interface!
+libsystemd = { version = "0.2.1", optional = true }
 
 [dependencies]
 thiserror = "1.0.21"
