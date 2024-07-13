@@ -57,6 +57,7 @@
 //! This crate must always compile with the latest Rust available in the latest Debian stable.
 //! That is currently Rust 1.41.1. (Debian 10 - Buster)
 
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 #![deny(missing_docs)]
 
