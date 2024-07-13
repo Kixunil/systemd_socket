@@ -76,8 +76,8 @@ pub(crate) mod systemd_sockets {
     use std::fmt;
     use std::sync::Mutex;
     use libsystemd::activation::FileDescriptor;
-    use libsystemd::errors::Error as LibSystemdError;
-    use libsystemd::errors::Result as LibSystemdResult;
+    use libsystemd::errors::SdError as LibSystemdError;
+    type LibSystemdResult<T> = Result<T, LibSystemdError>;
 
     #[derive(Debug)]
     pub(crate) struct Error(&'static Mutex<LibSystemdError>);

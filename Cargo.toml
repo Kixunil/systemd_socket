@@ -22,7 +22,7 @@ enable_systemd = ["libsystemd"]
 [target.'cfg(target_os = "linux")'.dependencies]
 # WARNING: It is NOT guaranteed that this crate will always use libsystemd as dependency!
 #          This as a feature is not considered a public interface!
-libsystemd = { version = "0.2.1", optional = true }
+libsystemd = { version = ">= 0.3.0, < 0.8.0", optional = true }
 
 [dependencies]
 thiserror = "1.0.21"
