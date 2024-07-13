@@ -81,7 +81,7 @@ pub(crate) enum BindErrorInner {
 ///
 /// As opposed to `std` and `async_std` sockets, tokio sockets can fail to convert.
 /// This error type expresses this possibility.
-#[cfg(any(feature = "tokio_0_2", feature = "tokio_0_3"))]
+#[cfg(any(feature = "tokio", feature = "tokio_0_2", feature = "tokio_0_3"))]
 #[derive(Debug, Error)]
 #[error(transparent)]
 pub enum TokioBindError {
@@ -96,7 +96,7 @@ pub enum TokioBindError {
 /// As opposed to `std` and `async_std` sockets, tokio sockets can fail to convert.
 /// This error type encapsulates conversion error together with additional information so that it
 /// can be displayed nicely. The encapsulation also allows for future-proofing.
-#[cfg(any(feature = "tokio_0_2", feature = "tokio_0_3"))]
+#[cfg(any(feature = "tokio", feature = "tokio_0_2", feature = "tokio_0_3"))]
 #[derive(Debug, Error)]
 #[error("failed to convert std socket {addr} into tokio socket")]
 pub struct TokioConversionError {

@@ -49,6 +49,7 @@ loop {
   systems, so you don't need to care about that.
 * `serde` - implements `serde::Deserialize` for `SocketAddr`
 * `parse_arg` - implements `parse_arg::ParseArg` for `SocketAddr`
+* `tokio` - adds `bind_tokio` method to `SocketAddr`
 * `tokio_0_2` - adds `bind_tokio_0_2` method to `SocketAddr`
 * `tokio_0_3` - adds `bind_tokio_0_3` method to `SocketAddr`
 * `async_std` - adds `bind_async_std` method to `SocketAddr`

@@ -14,7 +14,7 @@
 //! You also don't need to worry about conditional compilation to ensure OS compatibility.
 //! This crate handles that for you by disabling systemd on non-linux systems.
 //!
-//! Further, the crate also provides methods for binding `tokio` 0.2, 0.3, and `async_std` sockets if the appropriate features are
+//! Further, the crate also provides methods for binding `tokio` 1.0, 0.2, 0.3, and `async_std` sockets if the appropriate features are
 //! activated.
 //! 
 //! ## Example
@@ -47,6 +47,7 @@
 //!   systems, so you don't need to care about that.
 //! * `serde` - implements `serde::Deserialize` for `SocketAddr`
 //! * `parse_arg` - implements `parse_arg::ParseArg` for `SocketAddr`
+//! * `tokio` - adds `bind_tokio` method to `SocketAddr` (tokio 1.0)
 //! * `tokio_0_2` - adds `bind_tokio_0_2` method to `SocketAddr`
 //! * `tokio_0_3` - adds `bind_tokio_0_3` method to `SocketAddr`
 //! * `async_std` - adds `bind_async_std` method to `SocketAddr`
@@ -179,6 +180,34 @@ impl SocketAddr {
             },
             SocketAddrInner::Systemd(socket_name) => Self::get_systemd(socket_name, true).map(|(socket, _)| socket),
             SocketAddrInner::SystemdNoPrefix(socket_name) => Self::get_systemd(socket_name, false).map(|(socket, _)| socket),
+        }
+    }
+
+    /// Creates `tokio::net::TcpListener`
+    ///
+    /// To be specific, it binds the socket or converts systemd socket to `tokio` 1.0 socket.
+    ///
+    /// This method either `binds` the socket, if the address was provided or uses systemd socket
+    /// if the socket name was provided.
+    #[cfg(feature = "tokio")]
+    pub async fn bind_tokio(self) -> Result<tokio::net::TcpListener, TokioBindError> {
+        match self.0 {
+            SocketAddrInner::Ordinary(addr) => match tokio::net::TcpListener::bind(addr).await {
+                Ok(socket) => Ok(socket),
+                Err(error) => Err(TokioBindError::Bind(BindErrorInner::BindFailed { addr, error, }.into())),
+            },
+            SocketAddrInner::WithHostname(addr) => match tokio::net::TcpListener::bind(addr.as_str()).await {
+                Ok(socket) => Ok(socket),
+                Err(error) => Err(TokioBindError::Bind(BindErrorInner::BindOrResolvFailed { addr, error, }.into())),
+            },
+            SocketAddrInner::Systemd(socket_name) => {
+                let (socket, addr) = Self::get_systemd(socket_name, true)?;
+                socket.try_into().map_err(|error| TokioConversionError { addr, error, }.into())
+            },
+            SocketAddrInner::SystemdNoPrefix(socket_name) => {
+                let (socket, addr) = Self::get_systemd(socket_name, false)?;
+                socket.try_into().map_err(|error| TokioConversionError { addr, error, }.into())
+            },
         }
     }
 
