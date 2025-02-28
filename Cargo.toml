@@ -35,3 +35,4 @@ tokio = { package = "tokio", version = "1.0.0", optional = true, features = ["ne
 tokio_0_2 = { package = "tokio", version = "0.2", optional = true, features = ["tcp", "dns"] }
 tokio_0_3 = { package = "tokio", version = "0.3", optional = true, features = ["net"] }
 async-std = { version = "1.7.0", optional = true }
+libc = "0.2.155"
