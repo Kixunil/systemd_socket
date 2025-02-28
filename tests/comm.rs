@@ -36,6 +36,11 @@ fn main_master(slave: io::Result<Child>) {
 fn main_slave(addr: &str) {
     use systemd_socket::SocketAddr;
 
+    // SAFETY: this is the only thread that's going to mess with systemd sockets.
+    unsafe {
+        systemd_socket::init_unprotected().unwrap();
+    }
+
     let socket = addr
         .parse::<SocketAddr>()
         .expect("failed to parse socket")

@@ -4,7 +4,32 @@
 
 
 use thiserror::Error;
+use std::fmt;
 use std::io;
+
+/// Error returned when the library initialization fails.
+#[derive(Debug)]
+pub struct InitError(pub(crate) InitErrorInner);
+
+#[cfg(all(target_os = "linux", feature = "enable_systemd"))]
+type InitErrorInner = super::systemd_sockets::InitError;
+
+#[cfg(not(all(target_os = "linux", feature = "enable_systemd")))]
+type InitErrorInner = std::convert::Infallible;
+
+impl fmt::Display for InitError {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl std::error::Error for InitError {
+    #[inline]
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        self.0.source()
+    }
+}
 
 /// Error that can occur during parsing of `SocketAddr` from a string
 ///
