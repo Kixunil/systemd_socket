@@ -1,6 +1,6 @@
 [package]
 name = "systemd_socket"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Martin Habovstiak <martin.habovstiak@gmail.com>"]
 description = "A convenience crate for optionally supporting systemd socket activation."
 homepage = "https://github.com/Kixunil/systemd_socket"
