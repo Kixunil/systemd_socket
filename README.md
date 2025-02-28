@@ -57,7 +57,7 @@ loop {
 ## MSRV
 
 This crate must always compile with the latest Rust available in the latest Debian stable.
-That is currently Rust 1.41.1. (Debian 10 - Buster)
+That is currently Rust 1.48.1. (Debian 11 - Bullseye)
 
 ## License
 

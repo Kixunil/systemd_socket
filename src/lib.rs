@@ -73,7 +73,7 @@
 //! ## MSRV
 //!
 //! This crate must always compile with the latest Rust available in the latest Debian stable.
-//! That is currently Rust 1.41.1. (Debian 10 - Buster)
+//! That is currently Rust 1.48.0. (Debian 11 - Bullseye)
 
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
