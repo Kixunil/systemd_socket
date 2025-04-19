@@ -334,7 +334,7 @@ impl SocketAddr {
     ///
     /// To be specific, it binds the socket or converts systemd socket to `tokio` 1.0 socket.
     ///
-    /// This method either `binds` the socket, if the address was provided or uses systemd socket
+    /// This method either `bind`s the socket, if the address was provided or uses systemd socket
     /// if the socket name was provided.
     #[cfg(feature = "tokio")]
     pub async fn bind_tokio(self) -> Result<tokio::net::TcpListener, TokioBindError> {
@@ -349,13 +349,21 @@ impl SocketAddr {
             },
             SocketAddrInner::Systemd(socket_name) => {
                 let (socket, addr) = Self::get_systemd(socket_name, true)?;
-                socket.try_into().map_err(|error| TokioConversionError { addr, error, }.into())
-            },
+                Self::wrap_tokio(socket)
+                    .map_err(|error| TokioConversionError { addr, error }.into())
+            }
             SocketAddrInner::SystemdNoPrefix(socket_name) => {
                 let (socket, addr) = Self::get_systemd(socket_name, false)?;
-                socket.try_into().map_err(|error| TokioConversionError { addr, error, }.into())
-            },
+                Self::wrap_tokio(socket)
+                    .map_err(|error| TokioConversionError { addr, error }.into())
+            }
         }
+    }
+
+    #[cfg(feature = "tokio")]
+    fn wrap_tokio(socket: std::net::TcpListener) -> Result<tokio::net::TcpListener, std::io::Error> {
+        socket.set_nonblocking(true)?;
+        socket.try_into()
     }
 
     /// Creates `tokio::net::TcpListener`
