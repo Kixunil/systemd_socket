@@ -20,6 +20,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Select the minimal lock file
+      run: cp Cargo-minimal.lock Cargo.lock
+    - name: Set Rust version
+      if: matrix.os != 'macOS-latest'
+      run: rustup default 1.48.0
     - name: Build
       run: cargo build --verbose
     - name: Run tests
