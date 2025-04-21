@@ -10,6 +10,7 @@ keywords = ["systmed", "socket-activation"]
 categories = ["api-bindings", "config", "os::linux-apis"]
 edition = "2018"
 license = "MITNFA"
+rust-version = "1.48.0"
 
 [package.metadata.docs.rs]
 all-features = true
